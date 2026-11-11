@@ -107,7 +107,7 @@ body.invalid #bReport,body.invalid #bShare,body.invalid #bPrint{opacity:.45}
 .trow input{font:inherit;border:1.5px solid #d6d6d6;border-radius:10px;padding:8px 10px;font-size:15px;min-width:0;outline:0}.trow input:focus{border-color:var(--ink)}.trow input.v{font-weight:700;text-align:left;direction:ltr;font-size:16px}
 .sup:not(.three){grid-template-columns:minmax(0,1fr) 104px}
 .trow input.bad{border:2px solid #111;background:#e6e6e6}
-.f input[type=date]{text-align:right;font-size:16px}
+.f input[data-date]{font-size:16px}
 .repbar .sel{flex:1.2;padding:9px 6px;font-size:14px}
 .rsar{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;border:1px solid #ddd;border-radius:10px;padding:6px 12px;margin-top:8px;font-size:13px}
 .rsar span{color:#666;font-weight:700}.rsar b{font-size:17px;font-weight:900}.rsar .sep{color:#bbb}.rsar em{font-style:normal;color:#777;font-size:12px;flex-basis:100%}

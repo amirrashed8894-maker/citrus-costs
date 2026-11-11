@@ -1,13 +1,20 @@
-/* تكاليف الموالح — الواجهة والتقرير (v2.0.2). الحساب كله من calc() الأصلية في core.js */
-const VER='2.0.2';
+/* تكاليف الموالح — الواجهة والتقرير (v2.0.3). الحساب كله من calc() الأصلية في core.js */
+const VER='2.0.3';
 /* تحميل البيانات المحفوظة — نفس مفتاح وشكل وتحويل البرنامج الأصلي (منسوخ حرفيًا) */
-const SK='citrusCosts.v2';let S=_ld(SK,'citrusCosts');if(S.sar==null)S.sar=3.75;if(S.var&&S.var.some(v=>v[0]=='برتقال')){S.var=S.var.flatMap(v=>v[0]=='برتقال'?[['برتقال أبوسرة',v[1]],['برتقال بلدي',v[1]],['برتقال صيفي',v[1]]]:[v]);}if(S.variety=='برتقال')S.variety='برتقال أبوسرة';
+const SK='citrusCosts.v2';let S=_ld(SK,'citrusCosts');applyFreshDate();if(S.sar==null)S.sar=3.75;if(S.var&&S.var.some(v=>v[0]=='برتقال')){S.var=S.var.flatMap(v=>v[0]=='برتقال'?[['برتقال أبوسرة',v[1]],['برتقال بلدي',v[1]],['برتقال صيفي',v[1]]]:[v]);}if(S.variety=='برتقال')S.variety='برتقال أبوسرة';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const N=x=>'<span class="num">'+x+'</span>';
 const P=x=>'<span class="num">'+f(x,1)+'%</span>';
+function cairoISO(d){return new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Cairo',year:'numeric',month:'2-digit',day:'2-digit'}).format(d||new Date())}
 function D(x){const m=String(x||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?m[3]+'/'+m[2]+'/'+m[1]:x}
-function today(){const d=new Date();return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear()}
+function today(){return D(cairoISO())}
+function parseDateInput(x){var s=String(x==null?'':x).trim().replace(/[\u0660-\u0669]/g,c=>String(c.charCodeAt(0)-0x660)).replace(/[\u06F0-\u06F9]/g,c=>String(c.charCodeAt(0)-0x6F0)).replace(/[\u066B\u066C\u2013\u2014.\-]/g,'/').replace(/\s+/g,'');
+ var y,mo,d,m;if((m=s.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/))){y=+m[1];mo=+m[2];d=+m[3]}else if((m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/))){d=+m[1];mo=+m[2];y=+m[3]}else return '';
+ if(mo<1||mo>12||d<1||d>31||y<1990||y>2100)return '';const dt=new Date(Date.UTC(y,mo-1,d));if(dt.getUTCFullYear()!==y||dt.getUTCMonth()!==mo-1||dt.getUTCDate()!==d)return '';
+ return y+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
+function dateShown(){return 'date' in DR?DR.date:D(S.date)}
+function applyFreshDate(){try{if(!localStorage.getItem(SK)&&!localStorage.getItem('citrusCosts'))S.date=cairoISO()}catch(e){}if(!parseDateInput(S.date)&&!parseDateInput(D(S.date)))S.date=cairoISO()}
 let ERR={},DR={};            // أخطاء المدخلات والنص المكتوب غلط — بيتحفظوا في مفتاح منفصل عشان الغلط يفضل ظاهر بعد إعادة الفتح (S نفسها فيها آخر قيمة صحيحة)
 const UK='citrusCosts.v2.pending';try{const u=JSON.parse(localStorage.getItem(UK)||'null');if(u&&u.ERR&&u.DR){ERR=u.ERR;DR=u.DR}}catch(e){}
 let lastT=null;
@@ -21,7 +28,7 @@ const FIELDS=[['sec','الأسعار'],['usd','سعر الدولار','ج'],['sa
  ['sec','الكمية والنسب'],['net','الصافي في الحاوية','كجم'],['loss','نسبة الهالك من الخام','%',1],['cull','نسبة الفرزة بعد الهالك','%',1],['pw','هالك العبوات','%',1]];
 const PCT={loss:1,cull:1,pw:1};
 function shown(k){const key='k:'+k;if(key in DR)return DR[key];return PCT[k]?+(S[k]*100).toFixed(4):S[k]}
-function renderInputs(){let h='<div class="f full"><label>تاريخ الحساب</label><div class="in"><input type="date" data-date="1" value="'+esc(S.date)+'"></div></div>';
+function renderInputs(){let h='<div class="f full"><label>تاريخ الحساب</label><div class="in'+(ERR.date?' bad':'')+'"><input data-date="1" dir="ltr" inputmode="numeric" autocomplete="off" placeholder="يوم/شهر/سنة" aria-label="تاريخ الحساب يوم/شهر/سنة" value="'+esc(dateShown())+'"></div>'+(ERR.date?'<div class="emsg" data-for="date">'+esc(ERR.date)+'</div>':'')+'<div class="hint">ميلادي — يوم/شهر/سنة</div></div>';
  FIELDS.forEach(x=>{if(x[0]=='sec'){h+='<div class="sec">'+x[1]+'</div>';return}
   h+='<div class="f"><label>'+x[1]+'</label><div class="in'+(ERR['k:'+x[0]]?' bad':'')+'"><input inputmode="decimal" data-k="'+x[0]+'" value="'+esc(shown(x[0]))+'"><span class="u">'+x[2]+'</span></div>'+(ERR['k:'+x[0]]?'<div class="emsg" data-for="k:'+x[0]+'">'+ERR['k:'+x[0]]+'</div>':'')+'</div>'});
  $('#inputs').innerHTML=h}
@@ -34,8 +41,8 @@ function renderTables(){
 function renderChips(){
  $('#vars').innerHTML=S.var.map((v,i)=>'<button class="chip'+(v[0]===S.variety?' on':'')+'" data-v="'+i+'">'+esc(v[0])+'</button>').join('')+'<button class="chip add" id="addVar">+ صنف جديد</button>';
  $('#pkgs').innerHTML=S.pk.map((p,i)=>'<button class="chip sm'+(i==S.pkg?' on':'')+'" data-p="'+i+'">'+esc(p[0])+'</button>').join('')}
-function errList(){const L=[];Object.keys(ERR).forEach(k=>{const a=k.split(':');let nm;
-  if(a[0]=='k')nm=RULES[a[1]][0];else if(a[0]=='pk')nm=(a[2]=='1'?'سعر ':'وزن ')+'«'+(S.pk[a[1]]||[''])[0]+'»';else if(a[0]=='sup')nm='بند «'+(S.sup[a[1]]||[''])[0]+'»';else nm='غسيل «'+(S.var[a[1]]||[''])[0]+'»';
+function errList(all){const L=[];Object.keys(ERR).forEach(k=>{if(!all&&k==='date')return;const a=k.split(':');let nm;
+  if(k==='date')nm='تاريخ الحساب';else if(a[0]=='k')nm=RULES[a[1]][0];else if(a[0]=='pk')nm=(a[2]=='1'?'سعر ':'وزن ')+'«'+(S.pk[a[1]]||[''])[0]+'»';else if(a[0]=='sup')nm='بند «'+(S.sup[a[1]]||[''])[0]+'»';else nm='غسيل «'+(S.var[a[1]]||[''])[0]+'»';
   L.push(nm+': '+ERR[k])});return L}
 
 /* ---------- العرض المباشر ---------- */
@@ -68,19 +75,20 @@ function renderAll(){renderChips();renderInputs();renderTables();renderLive();sh
 
 /* ---------- الأحداث ---------- */
 function setErr(key,msg,raw){if(msg){ERR[key]=msg;DR[key]=raw}else{delete ERR[key];delete DR[key]}}
-function markBad(el,key){const isK=!!el.dataset.k,box=isK?el.parentNode:el,anchor=isK?box:el.parentNode,scope=isK?box.parentNode:anchor.parentNode;
+function markBad(el,key){const isK=!!(el.dataset.k||el.dataset.date),box=isK?el.parentNode:el,anchor=isK?box:el.parentNode,scope=isK?box.parentNode:anchor.parentNode;
  box.classList.toggle('bad',!!ERR[key]);scope.querySelectorAll('.emsg[data-for="'+key+'"]').forEach(m=>m.remove());
  if(ERR[key]){const m=document.createElement('div');m.className='emsg';m.dataset.for=key;m.textContent=ERR[key];anchor.insertAdjacentElement('afterend',m)}}
 document.addEventListener('input',e=>{const t=e.target;
- if(t.dataset.date){S.date=t.value;save();return}
+ if(t.dataset.date){const raw=t.value,iso=parseDateInput(raw);if(!String(raw).trim())setErr('date','فاضي — اكتب التاريخ يوم/شهر/سنة',raw);else if(!iso)setErr('date','اكتبه يوم/شهر/سنة ميلادي، زي 11/11/2026',raw);else{setErr('date','');S.date=iso}markBad(t,'date');save();return}
  if(t.dataset.k){const k=t.dataset.k,key='k:'+k,msg=checkVal(t.value,RULES[k][1]);setErr(key,msg,t.value);if(!msg)S[k]=toStore(t.value,PCT[k]);markBad(t,key);save();renderLive();return}
  if(t.dataset.t){const [a,i,j]=t.dataset.t.split(':'),row=S[a][+i];if(!row)return;
   if(j=='0'){const old=row[0];row[0]=t.value;if(a=='var'&&S.variety==old)S.variety=t.value;save();renderLive();return}
   const rule=(a=='pk'&&j=='2')?'gt0':'ge0',msg=checkVal(t.value,rule,true);setErr(t.dataset.t,msg,t.value);if(!msg)row[+j]=toStore(t.value);markBad(t,t.dataset.t);save();renderLive()}});
 document.addEventListener('change',e=>{const t=e.target;
+ if(t.dataset.date){const iso=parseDateInput(t.value);if(iso){S.date=iso;t.value=D(iso);setErr('date','');markBad(t,'date');save()}return}
  if(t.dataset.t&&t.dataset.t.endsWith(':0')){renderChips();return}
  const key=t.dataset.k?'k:'+t.dataset.k:t.dataset.t;if(!key||ERR[key])return;if(String(t.value).trim()==='')return;const x=parseNum(t.value);if(isFinite(x)&&String(x)!==t.value.trim())t.value=String(x)});
-function blocked(){const E=errList();if(!E.length)return false;alert('صحّح الخانات دي الأول:\n• '+E.join('\n• '));return true}
+function blocked(){const E=errList(true);if(!E.length)return false;alert('صحّح الخانات دي الأول:\n• '+E.join('\n• '));return true}
 document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
  if(t.dataset.v!=null){S.variety=S.var[+t.dataset.v][0];save();renderChips();renderLive()}
  else if(t.dataset.p!=null){S.pkg=+t.dataset.p;save();renderChips();renderLive()}
@@ -138,5 +146,5 @@ function sharePdf(){$('#busy').hidden=false;makePdf().then(pdf=>{const blob=pdf.
   if(file&&navigator.canShare&&navigator.canShare({files:[file]})){$('#busy').hidden=true;return navigator.share({files:[file],title:name.replace('.pdf',''),text:'تقرير '+name.replace(/_/g,' ').replace('.pdf','')}).catch(()=>{})}
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);$('#busy').hidden=true})
  .catch(e=>{$('#busy').hidden=true;alert('ماقدرتش أجهز الـ PDF: '+e)})}
-window.CCAPP={setMode:m=>{REPMODE=m},makePdf,state:()=>S,render:renderAll,calc:()=>calc(S),reportHtml};
+window.CCAPP={setMode:m=>{REPMODE=m},makePdf,state:()=>S,render:renderAll,calc:()=>calc(S),reportHtml,D,today,cairoISO,parseDateInput};
 renderAll();
