@@ -1,5 +1,5 @@
 /* تكاليف الموالح — الواجهة والتقرير (v2.0.0). الحساب كله من calc() الأصلية في core.js */
-const VER='2.0.0';
+const VER='2.0.1';
 /* تحميل البيانات المحفوظة — نفس مفتاح وشكل وتحويل البرنامج الأصلي (منسوخ حرفيًا) */
 const SK='citrusCosts.v2';let S=_ld(SK,'citrusCosts');if(S.sar==null)S.sar=3.75;if(S.var&&S.var.some(v=>v[0]=='برتقال')){S.var=S.var.flatMap(v=>v[0]=='برتقال'?[['برتقال أبوسرة',v[1]],['برتقال بلدي',v[1]],['برتقال صيفي',v[1]]]:[v]);}if(S.variety=='برتقال')S.variety='برتقال أبوسرة';
 const $=s=>document.querySelector(s);
