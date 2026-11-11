@@ -1,5 +1,5 @@
-/* تكاليف الموالح — الواجهة والتقرير (v2.0.0). الحساب كله من calc() الأصلية في core.js */
-const VER='2.0.1';
+/* تكاليف الموالح — الواجهة والتقرير (v2.0.2). الحساب كله من calc() الأصلية في core.js */
+const VER='2.0.2';
 /* تحميل البيانات المحفوظة — نفس مفتاح وشكل وتحويل البرنامج الأصلي (منسوخ حرفيًا) */
 const SK='citrusCosts.v2';let S=_ld(SK,'citrusCosts');if(S.sar==null)S.sar=3.75;if(S.var&&S.var.some(v=>v[0]=='برتقال')){S.var=S.var.flatMap(v=>v[0]=='برتقال'?[['برتقال أبوسرة',v[1]],['برتقال بلدي',v[1]],['برتقال صيفي',v[1]]]:[v]);}if(S.variety=='برتقال')S.variety='برتقال أبوسرة';
 const $=s=>document.querySelector(s);
@@ -8,9 +8,10 @@ const N=x=>'<span class="num">'+x+'</span>';
 const P=x=>'<span class="num">'+f(x,1)+'%</span>';
 function D(x){const m=String(x||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?m[3]+'/'+m[2]+'/'+m[1]:x}
 function today(){const d=new Date();return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear()}
-let ERR={},DR={};            // أخطاء المدخلات والنص المكتوب غلط (مش بيتخزن في S)
+let ERR={},DR={};            // أخطاء المدخلات والنص المكتوب غلط — بيتحفظوا في مفتاح منفصل عشان الغلط يفضل ظاهر بعد إعادة الفتح (S نفسها فيها آخر قيمة صحيحة)
+const UK='citrusCosts.v2.pending';try{const u=JSON.parse(localStorage.getItem(UK)||'null');if(u&&u.ERR&&u.DR){ERR=u.ERR;DR=u.DR}}catch(e){}
 let lastT=null;
-function save(){try{lastT=Date.now();localStorage.setItem(SK,JSON.stringify({ver:2,t:lastT,S}));showSaved()}catch(e){const n=$('#ls');if(n)n.textContent='تعذّر الحفظ على الجهاز (وضع التصفح الخاص؟)'}}
+function save(){try{lastT=Date.now();localStorage.setItem(SK,JSON.stringify({ver:2,t:lastT,S}));if(Object.keys(ERR).length)localStorage.setItem(UK,JSON.stringify({ERR,DR}));else localStorage.removeItem(UK);showSaved()}catch(e){const n=$('#ls');if(n)n.textContent='تعذّر الحفظ على الجهاز (وضع التصفح الخاص؟)'}}
 function showSaved(){const n=$('#ls');if(!n||!lastT)return;const d=new Date(lastT);n.textContent='آخر حفظ '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
 try{const p=JSON.parse(localStorage.getItem(SK)||'null');if(p&&p.t)lastT=p.t}catch(e){}
 window.addEventListener('pagehide',()=>save());document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')save()});
@@ -56,9 +57,9 @@ function renderLive(){const E=errList(),bad=E.length>0;document.body.classList.t
  $('#mojmal').innerHTML='<h2>المجمل <small>ج / طن صافي</small></h2><div class="bar">'+G.map(g=>'<i style="width:'+(r.ton?g[1]/r.ton*100:0)+'%"></i>').join('')+'</div><div class="bk"><table>'+
   G.map((g,i)=>'<tr><td><span class="sw s'+i+'"></span>'+g[0]+'</td><td class="v">'+f(g[1])+'</td><td class="v">'+P(r.ton?g[1]/r.ton*100:0)+'</td></tr>').join('')+
   '<tr class="t"><td>الإجمالي</td><td class="v">'+f(r.ton)+'</td><td class="v">$'+f(r.ton/u)+'</td></tr></table></div>';
- $('#cmp').innerHTML='<h2>مقارنة العبوات <small>تكلفة الطن الصافي</small></h2><div class="bk"><table><tr class="h"><td>العبوة</td><td class="v">ج / طن</td><td class="v">$ / طن</td><td class="v">الفرق $</td></tr>'+
+ $('#cmp').innerHTML='<h2>مقارنة العبوات <small>تكلفة الطن الصافي</small></h2><div class="bk"><table><tr class="h"><td>العبوة</td><td class="vh">ج / طن</td><td class="vh">$ / طن</td><td class="vh">الفرق $</td></tr>'+
   r.cmp.map((x,i)=>'<tr'+(x.n==r.pkgName?' class="sel"':'')+'><td>'+esc(x.n)+'</td><td class="v">'+f(x.v)+'</td><td class="v">'+f(x.v/u)+'</td><td class="v">'+(x.d<1e-9?'الأرخص':'+'+f(x.d))+'</td></tr>').join('')+'</table></div>';
- let b='<h2>التفاصيل <small>لكل طن صافي</small></h2><div class="bk"><table><tr class="h"><td>البند</td><td class="v">ج / طن</td><td class="v">$ / طن</td><td class="v">%</td></tr>';
+ let b='<h2>التفاصيل <small>لكل طن صافي</small></h2><div class="bk"><table><tr class="h"><td>البند</td><td class="vh">ج / طن</td><td class="vh">$ / طن</td><td class="vh">%</td></tr>';
  rows(r).forEach(x=>{if(x[0]=='g')b+='<tr class="g"><td colspan="4">'+esc(x[1])+'</td></tr>';else{const s=x[0]=='s',n=s?x[1]:x[0],v=s?x[2]:x[1];b+='<tr'+(s?' class="s"':'')+'><td>'+esc(n)+'</td><td class="v">'+f(v)+'</td><td class="v">'+f(v/u)+'</td><td class="v">'+P(v/r.ton*100)+'</td></tr>'}});
  b+='<tr class="t"><td>إجمالي تكلفة الطن الصافي</td><td class="v">'+f(r.ton)+'</td><td class="v">'+f(r.ton/u)+'</td><td class="v">100%</td></tr></table>'+
   '<div class="hint">الخام المطلوب للحاوية '+N(f(r.rawNeed))+' كجم · هالك '+N(f(r.lossKg))+' كجم · فرزة '+N(f(r.cullKg))+' كجم · عبوات معبأة '+N(f(r.packed,0))+' · مشتراة '+N(f(r.bought,0))+'</div></div>';
@@ -117,8 +118,8 @@ function reportHtml(){const r=calc(S),u=S.usd,T=S.net/1000,G=groups(r),pages=REP
  '<tr class="gt"><td>إجمالي تكلفة الطن الصافي</td><td class="n">'+f(r.ton)+'</td><td class="n">'+f(r.ton/u)+'</td><td class="n">'+f(r.cont)+'</td><td class="n">'+f(r.cont/u)+'</td><td class="n">100%</td></tr></tbody></table>'+
  '<div class="note">الإجمالي = الخام + العبوة + المستلزمات + غسيل المحطة، لكل طن صافي داخل العبوات؛ الحاوية = الطن × '+f(T,1)+' طن.</div>'+
  '<h3>الكميات للحاوية</h3><table class="rt q"><tbody><tr><td>الصافي في العبوات</td><td class="q2"><span class="ltr">'+f(S.net,0)+'</span> كجم</td><td>الخام المطلوب</td><td class="q2"><span class="ltr">'+f(r.rawNeed)+'</span> كجم</td></tr><tr><td>الهالك</td><td class="q2"><span class="ltr">'+f(r.lossKg)+'</span> كجم</td><td>الفرزة للمحلي</td><td class="q2"><span class="ltr">'+f(r.cullKg)+'</span> كجم</td></tr><tr><td>قيمة بيع الفرزة</td><td class="q2"><span class="ltr">'+f(r.cullSale)+'</span> ج</td><td>وزن العبوة</td><td class="q2"><span class="ltr">'+f(r.pkgW,1)+'</span> كجم</td></tr><tr><td>العبوات المعبأة</td><td class="q2"><span class="ltr">'+f(r.packed,0)+'</span></td><td>العبوات المطلوب شراؤها</td><td class="q2"><span class="ltr">'+f(r.bought,0)+'</span></td></tr></tbody></table>'+
- '<div class="note">العبوات المعبأة = الصافي ÷ وزن العبوة مقرّب لأعلى؛ المشتراة = المعبأة × (1 + '+f(S.pw*100,1)+'%) مقرّب لأعلى.</div>'+
- '<h3>طريقة الحساب</h3><ul><li>الخام المطلوب = الصافي ÷ ((1 − الهالك '+f(S.loss*100,1)+'%) × (1 − الفرزة '+f(S.cull*100,1)+'%)).</li><li>تكلفة الفرزة = وزنها × (سعر الخام '+f(S.raw)+' − سعر بيعها '+f(S.cullP)+').</li><li>سعر الخام واصل المحطة، فلا يوجد بند نقل خام.</li><li>التكلفة للمنتج محمّلًا على الحاوية في المحطة، بدون نقل للميناء أو شحن.</li></ul></div>'+foot(2)+'</div>';
+ '<div class="note">العبوات المعبأة = الصافي ÷ وزن العبوة مقرّب لأعلى؛ المشتراة = المعبأة × (1 + <span class="ltr">'+f(S.pw*100,1)+'%</span>) مقرّب لأعلى.</div>'+
+ '<h3>طريقة الحساب</h3><ul><li>الخام المطلوب = الصافي ÷ ((1 − الهالك <span class="ltr">'+f(S.loss*100,1)+'%</span>) × (1 − الفرزة <span class="ltr">'+f(S.cull*100,1)+'%</span>)).</li><li>تكلفة الفرزة = وزنها × (سعر الخام '+f(S.raw)+' − سعر بيعها '+f(S.cullP)+').</li><li>سعر الخام واصل المحطة، فلا يوجد بند نقل خام.</li><li>التكلفة للمنتج محمّلًا على الحاوية في المحطة، بدون نقل للميناء أو شحن.</li></ul></div>'+foot(2)+'</div>';
  return [p1,p2]}
 function shrink(root){root.querySelectorAll('.page').forEach(pg=>{const pc=pg.querySelector('.pc');pc.style.transform='';pc.style.width='';const avail=1123-36-62;let h=pc.offsetHeight;if(h>avail){let s=Math.max(0.55,avail/h);pc.style.width=(706/s)+'px';h=pc.offsetHeight;s=Math.max(0.55,avail/h);pc.style.width=(706/s)+'px';pc.style.transformOrigin='top right';pc.style.transform='scale('+s+')'}})}
 function buildPages(){$('#rep').hidden=false;$('#pages').innerHTML=reportHtml().map(p=>'<div class="pagewrap">'+p+'</div>').join('');shrink($('#pages'))}
