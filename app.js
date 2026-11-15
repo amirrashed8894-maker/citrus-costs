@@ -1,5 +1,5 @@
-/* تكاليف الموالح — الواجهة والتقرير (v2.0.3). الحساب كله من calc() الأصلية في core.js */
-const VER='2.0.3';
+/* تكاليف الموالح — الواجهة والتقرير (v2.0.4). الحساب كله من calc() الأصلية في core.js */
+const VER='2.0.4';
 /* تحميل البيانات المحفوظة — نفس مفتاح وشكل وتحويل البرنامج الأصلي (منسوخ حرفيًا) */
 const SK='citrusCosts.v2';let S=_ld(SK,'citrusCosts');applyFreshDate();if(S.sar==null)S.sar=3.75;if(S.var&&S.var.some(v=>v[0]=='برتقال')){S.var=S.var.flatMap(v=>v[0]=='برتقال'?[['برتقال أبوسرة',v[1]],['برتقال بلدي',v[1]],['برتقال صيفي',v[1]]]:[v]);}if(S.variety=='برتقال')S.variety='برتقال أبوسرة';
 const $=s=>document.querySelector(s);
@@ -21,7 +21,11 @@ let lastT=null;
 function save(){try{lastT=Date.now();localStorage.setItem(SK,JSON.stringify({ver:2,t:lastT,S}));if(Object.keys(ERR).length)localStorage.setItem(UK,JSON.stringify({ERR,DR}));else localStorage.removeItem(UK);showSaved()}catch(e){const n=$('#ls');if(n)n.textContent='تعذّر الحفظ على الجهاز (وضع التصفح الخاص؟)'}}
 function showSaved(){const n=$('#ls');if(!n||!lastT)return;const d=new Date(lastT);n.textContent='آخر حفظ '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
 try{const p=JSON.parse(localStorage.getItem(SK)||'null');if(p&&p.t)lastT=p.t}catch(e){}
-window.addEventListener('pagehide',()=>save());document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')save()});
+window.addEventListener('pagehide',()=>save());
+window.addEventListener('beforeunload',()=>save());
+window.addEventListener('freeze',()=>save());
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')save()});
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
 
 /* ---------- المدخلات ---------- */
 const FIELDS=[['sec','الأسعار'],['usd','سعر الدولار','ج'],['sar','سعر الدولار بالريال','ريال'],['raw','سعر الخام واصل المحطة','ج / كجم'],['cullP','سعر بيع الفرزة محلي','ج / كجم'],
