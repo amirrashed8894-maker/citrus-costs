@@ -1,5 +1,5 @@
-/* تكاليف الموالح — الواجهة والتقرير (v2.0.4). الحساب كله من calc() الأصلية في core.js */
-const VER='2.0.4';
+/* تكاليف الموالح — الواجهة والتقرير (v2.1.0). الحساب كله من calc() الأصلية في core.js */
+const VER='2.1.0';
 /* تحميل البيانات المحفوظة — نفس مفتاح وشكل وتحويل البرنامج الأصلي (منسوخ حرفيًا) */
 const SK='citrusCosts.v2';let S=_ld(SK,'citrusCosts');applyFreshDate();if(S.sar==null)S.sar=3.75;if(S.var&&S.var.some(v=>v[0]=='برتقال')){S.var=S.var.flatMap(v=>v[0]=='برتقال'?[['برتقال أبوسرة',v[1]],['برتقال بلدي',v[1]],['برتقال صيفي',v[1]]]:[v]);}if(S.variety=='برتقال')S.variety='برتقال أبوسرة';
 const $=s=>document.querySelector(s);
@@ -145,10 +145,9 @@ function makePdf(){const wasHidden=$('#rep').hidden;
   pgs.forEach((p,i)=>{ch=ch.then(()=>html2canvas(p,{scale:2,backgroundColor:'#fff',useCORS:true,logging:false}).then(c=>{if(i)pdf.addPage();pdf.addImage(c.toDataURL('image/jpeg',0.92),'JPEG',0,0,210,297)}))});
   return ch.then(()=>{holder.remove();if(wasHidden)$('#rep').hidden=true;return pdf})}).catch(e=>{holder.remove();throw e})}
 function fname(){return 'تكاليف_الموالح_'+String(S.variety).replace(/\s+/g,'_')+'_'+String(D(S.date)||today()).replace(/\//g,'-')+'.pdf'}
-function sharePdf(){$('#busy').hidden=false;makePdf().then(pdf=>{const blob=pdf.output('blob'),name=fname();window.__lastPdf={size:blob.size,name:name};
-  let file=null;try{file=new File([blob],name,{type:'application/pdf'})}catch(e){}
-  if(file&&navigator.canShare&&navigator.canShare({files:[file]})){$('#busy').hidden=true;return navigator.share({files:[file],title:name.replace('.pdf',''),text:'تقرير '+name.replace(/_/g,' ').replace('.pdf','')}).catch(()=>{})}
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);$('#busy').hidden=true})
+function sharePdf(){/* in-app preview; «إرسال واتساب» inside it shares the file — nothing is downloaded automatically */
+ $('#busy').hidden=false;makePdf().then(pdf=>{const blob=pdf.output('blob'),name=fname();window.__lastPdf={size:blob.size,name:name};$('#busy').hidden=true;
+  PdfShare.open(blob,name,{title:name.replace('.pdf','').replace(/_/g,' ')})})
  .catch(e=>{$('#busy').hidden=true;alert('ماقدرتش أجهز الـ PDF: '+e)})}
 window.CCAPP={setMode:m=>{REPMODE=m},makePdf,state:()=>S,render:renderAll,calc:()=>calc(S),reportHtml,D,today,cairoISO,parseDateInput};
 renderAll();
