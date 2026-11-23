@@ -176,6 +176,7 @@ body.invalid #bReport,body.invalid #bShare,body.invalid #bPrint{opacity:.45}
   <button class="btn ghost wide" id="bAddVar">+ إضافة صنف</button>
  </section>
  <section class="card tools">
+  <button class="btn pri" id="bToSawafi">نسخ التكاليف للصوافي</button>
   <button class="btn ghost" id="bReset">الأرقام الأصلية</button>
  </section>
  <footer class="foot">يشتغل من غير نت بعد أول فتح · البيانات محفوظة على الجهاز ده بس <span id="ver"></span></footer>
@@ -193,6 +194,7 @@ body.invalid #bReport,body.invalid #bShare,body.invalid #bPrint{opacity:.45}
 <script src="core.js"></script>
 <script src="pdf-share.js"></script>
 <script src="app.js"></script>
+<script src="to-sawafi.js"></script>
 <script>
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').then(function(r){r.update&&r.update();setInterval(function(){r.update()},3600000)});var had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',function(){if(had&&!window.__rl){window.__rl=1;location.reload()}})})}
 </script>
